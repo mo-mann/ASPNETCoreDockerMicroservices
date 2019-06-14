@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26906.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8AD59A0B-BE21-4351-913E-2AD6FA00997A}"
 EndProject
@@ -18,7 +18,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{A79C663C-57A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Identity.Api", "Services\Identity.Api\Identity.Api.csproj", "{91EBB73B-ABF1-41CB-8D39-A4E17AE32E2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events", "Foundation\Events\Events.csproj", "{939ABF9A-2C7E-4A2D-8C44-5BB6DA926C68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Events", "Foundation\Events\Events.csproj", "{939ABF9A-2C7E-4A2D-8C44-5BB6DA926C68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{033BE62F-EDC0-4A59-AF22-C386708EE66E}"
+	ProjectSection(SolutionItems) = preProject
+		Database\Dockerfile = Database\Dockerfile
+		Database\entrypoint.sh = Database\entrypoint.sh
+		Database\SqlCmdScript.sql = Database\SqlCmdScript.sql
+		Database\SqlCmdStartup.sh = Database\SqlCmdStartup.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BFC38755-C700-4779-B66E-5B1906E7906D}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		DockerfileApplicantsApi = DockerfileApplicantsApi
+		DockerfileIdentityApi = DockerfileIdentityApi
+		DockerfileJobsApi = DockerfileJobsApi
+		DockerfileWeb = DockerfileWeb
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

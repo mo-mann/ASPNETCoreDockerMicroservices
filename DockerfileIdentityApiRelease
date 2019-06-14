@@ -1,0 +1,54 @@
+
+# Get the latest .Net Core SDK image
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
+WORKDIR /app
+
+COPY Services/Identity.Api/*.csproj ./Services/Identity.Api/
+COPY Foundation/Events/*.csproj Foundation/Events/
+# COPY Foundation/Http/*.csproj Foundation/Http/
+
+
+# Check the files have been copied with the correct directory structure.
+# WORKDIR /app/Services/Identity.Api
+# RUN ls -la
+# WORKDIR /app/Foundation/Events
+# RUN ls -la
+# WORKDIR /app/Foundation/Http
+# RUN ls -la
+
+
+WORKDIR /app/Services/Identity.Api
+RUN dotnet restore
+
+COPY Services/Identity.Api/. ./
+WORKDIR /app/Foundation/Events
+COPY Foundation/Events/ ./
+
+WORKDIR /app/Services/Identity.Api
+RUN dotnet publish -c Release -o /publish
+
+WORKDIR /publish
+# RUN ls -la
+
+# *********************************************************************************************
+# For some reason the following runtime image is not starting.
+# Something about not being an SDK image even though the dotnet runtime is there and "dotnet --info" works but "dotnet Identity.Api.dll"
+# FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS runtime
+# WORKDIR /app
+# COPY --from=build-env /publish ./
+# RUN ls -la
+# *********************************************************************************************
+
+EXPOSE 80/tcp
+
+#Keep the debugger container on
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+# ENTRYPOINT ["dotnet", "--info"]
+
+# RUN dotnet Identity.Api.dll
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+# ENTRYPOINT ["dotnet", "Identity.Api.dll"]
+
+ENTRYPOINT ["dotnet", "Identity.Api.dll"]

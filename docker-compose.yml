@@ -3,84 +3,88 @@ version: '3'
 services:
 
   webmvc:
-    image: web 
+    image: micro-srv-demo-web 
     build:
-      context: ./web
-      dockerfile: Dockerfile.debug
+      context: .
+      dockerfile: DockerfileWebRelease
     ports: 
     - "8080:80"
     volumes: 
       - ./web/bin/pub/:/app
-    container_name: web
+    container_name: micro-srv-demo-web
     depends_on:
       - applicants.api
       - identity.api
       - jobs.api
 
   applicants.api:
-    image: applicants.api
+    image: micro-srv-demo-applicants.api
     environment:
       - ConnectionString=Server=sql.data;User=sa;Password=Pass@word;Database=dotnetgigs.applicants;    
     build:
-      context: ./services/applicants.api
-      dockerfile: Dockerfile.debug
+      context: .
+      dockerfile: DockerfileApplicantsApiRelease
     ports: 
     - "8081:80"
     volumes: 
       - ./services/applicants.api/bin/pub/:/app
-    container_name: applicants.api
+    container_name: micro-srv-demo-applicants.api
     depends_on:
       - sql.data
       - rabbitmq
 
   jobs.api:
-    image: jobs.api
+    image: micro-srv-demo-jobs.api
     environment:
       - ConnectionString=Server=sql.data;User=sa;Password=Pass@word;Database=dotnetgigs.jobs;    
     build:
-      context: ./services/jobs.api
-      dockerfile: Dockerfile.debug
+      context: .
+      dockerfile: DockerfileJobsApiRelease
     ports: 
     - "8083:80"
     volumes: 
       - ./services/jobs.api/bin/pub/:/app
-    container_name: jobs.api
+    container_name: micro-srv-demo-jobs.api
     depends_on:
       - sql.data
       - rabbitmq
 
   identity.api:
-    image: identity.api
+    image: micro-srv-demo-identity.api
     environment:
       - RedisHost=user.data:6379
     build:
-      context: ./services/identity.api
-      dockerfile: Dockerfile.debug
+      context: .
+      dockerfile: DockerfileIdentityApiRelease
     ports: 
     - "8084:80"
     volumes: 
       - ./services/identity.api/bin/pub/:/app
-    container_name: identity.api
+    container_name: micro-srv-demo-identity.api
     depends_on:
       - user.data       
+ 
 
   sql.data:
-    image: mssql-linux
+    image: micro-srv-demo-mssql-linux
     build:
       context: ./Database
       dockerfile: Dockerfile
     ports:
       - "5433:1433"
-    container_name: mssql-linux
+    container_name: micro-srv-demo-mssql-linux
 
   user.data:
-    image: redis  
+    image: redis
+    ports:
+      - "7000:6379"
+    container_name: micro-srv-demo-redis
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "15672:15672"
-    container_name: rabbitmq
+    container_name: micro-srv-demo-rabbitmq
   
 
    

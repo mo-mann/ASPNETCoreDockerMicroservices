@@ -1,0 +1,53 @@
+
+# Get the latest .Net Core SDK image
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
+WORKDIR /app
+
+COPY Web/*.csproj ./Web/
+COPY Foundation/Http/*.csproj Foundation/Http/
+
+
+# Check the files have been copied with the correct directory structure.
+# WORKDIR /app/Web
+# RUN ls -la
+# WORKDIR /app/Foundation/Events
+# RUN ls -la
+# WORKDIR /app/Foundation/Http
+# RUN ls -la
+
+
+WORKDIR /app/Web
+RUN dotnet restore
+
+COPY Web/. ./
+WORKDIR /app/Foundation/Http
+COPY Foundation/Http/ ./
+
+WORKDIR /app/Web
+RUN dotnet publish -c Release -o /publish
+
+WORKDIR /publish
+# RUN ls -la
+
+# *********************************************************************************************
+# For some reason the following runtime image is not starting.
+# Something about not being an SDK image even though the dotnet runtime is there and "dotnet --info" works but "dotnet Web.dll"
+# FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS runtime
+# WORKDIR /app
+# COPY --from=build-env /publish ./
+# RUN ls -la
+# *********************************************************************************************
+
+EXPOSE 80/tcp
+
+#Keep the debugger container on
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+# ENTRYPOINT ["dotnet", "--info"]
+
+# RUN dotnet Web.dll
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+# ENTRYPOINT ["dotnet", "Web.dll"]
+
+ENTRYPOINT ["dotnet", "Web.dll"]

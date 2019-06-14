@@ -1,5 +1,4 @@
-﻿ 
-using System;
+﻿
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Identity.Api.Messaging.Consumers;
@@ -12,6 +11,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using Swashbuckle.AspNetCore.Swagger;
+using System;
 
 namespace Identity.Api
 {
@@ -31,18 +32,36 @@ namespace Identity.Api
         {
             services.AddMvc();
 
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Identity API", Version = "v1" });
+            });
+
             //By connecting here we are making sure that our service
             //cannot start until redis is ready. This might slow down startup,
             //but given that there is a delay on resolving the ip address
             //and then creating the connection it seems reasonable to move
             //that cost to startup instead of having the first request pay the
             //penalty.
-            services.AddSingleton(sp =>
+
+            try
             {
-                var configuration = new ConfigurationOptions {ResolveDns = true};
-                configuration.EndPoints.Add(Configuration["RedisHost"]);
-                return ConnectionMultiplexer.Connect(configuration);
-            });
+                var redisCon = Configuration["RedisHost"] ?? "192.168.176.3:6379";
+
+                services.AddSingleton(sp =>
+                {
+                    var configuration = new ConfigurationOptions {ResolveDns = true};
+                    //configuration.EndPoints.Add(Configuration["RedisHost"]);
+                    configuration.EndPoints.Add(redisCon);
+
+                    return ConnectionMultiplexer.Connect(configuration);
+                });
+            }
+            catch(Exception ex)
+            {
+                var error = ex.ToString();
+            }
 
             services.AddTransient<IIdentityRepository, IdentityRepository>();
             var builder = new ContainerBuilder();
@@ -88,10 +107,20 @@ namespace Identity.Api
             }
 
             app.UseMvc();
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity API V1");
+            });
 
             // stash an applicant's user data in redis for test purposes...this would simulate establishing auth/session in the real world
-            var identityRepository=serviceProvider.GetService<IIdentityRepository>();
+            var identityRepository =serviceProvider.GetService<IIdentityRepository>();
             await identityRepository.UpdateUserAsync(new User {Id = "1", Email = "josh903902@gmail.com",Name = "Josh Dillinger"});
+            await identityRepository.UpdateUserAsync(new User { Id = "2", Email = "fred@yabbayabbado.com", Name = "Fred Flintstone" });
 
             var bus = ApplicationContainer.Resolve<IBusControl>();
             var busHandle = TaskUtil.Await(() => bus.StartAsync());

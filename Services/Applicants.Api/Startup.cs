@@ -1,15 +1,15 @@
-﻿using System;
-using Applicants.Api.Messaging.Consumers;
+﻿using Applicants.Api.Messaging.Consumers;
+using Applicants.Api.Services;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using MassTransit;
 using MassTransit.Util;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Applicants.Api.Services;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using MassTransit;
-
+using Swashbuckle.AspNetCore.Swagger;
+using System;
 
 namespace Applicants.Api
 {
@@ -28,6 +28,13 @@ namespace Applicants.Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Applicants API", Version = "v1" });
+            });
+
             services.AddScoped<IApplicantRepository>(c => new ApplicantRepository(Configuration["ConnectionString"]));
 
             var builder = new ContainerBuilder();
@@ -74,6 +81,15 @@ namespace Applicants.Api
             }
 
             app.UseMvc();
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Applicants API V1");
+            });
 
             var bus = ApplicationContainer.Resolve<IBusControl>();
             var busHandle = TaskUtil.Await(() => bus.StartAsync());
